@@ -22,10 +22,9 @@
 			{
 				"command": "lod.giveMeme",
 				"title": "MemeCode: Generate Meme"
-			},
-			{
-				"command": "lod.unlint",
-				"title": "MemeCode: Unlint"
+			},{
+				"command": "lod.thanosMeme",
+				"title": "MemeCode: Oh Snap"
 			}
 		]
 	},
