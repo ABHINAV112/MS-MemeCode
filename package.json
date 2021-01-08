@@ -10,14 +10,22 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:lod.helloWorld"
+		"*"
 	],
 	"main": "./extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "lod.helloWorld",
-				"title": "Hello World"
+				"command": "lod.lint",
+				"title": "MemeCode: Lint"
+			},
+			{
+				"command": "lod.giveMeme",
+				"title": "MemeCode: Generate Meme"
+			},
+			{
+				"command": "lod.unlint",
+				"title": "MemeCode: Unlint"
 			}
 		]
 	},
@@ -36,5 +44,8 @@
 		"mocha": "^8.1.3",
 		"typescript": "^4.1.2",
 		"vscode-test": "^1.4.1"
+	},
+	"dependencies": {
+		"axios": "^0.21.1"
 	}
 }
