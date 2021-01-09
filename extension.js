@@ -179,7 +179,7 @@ const createSnapWebView = function (quote) {
         );
       });
     }
-  }, 5000);
+  }, 3000);
 
   panel.onDidDispose(() => {
     clearInterval(timerInterval);
