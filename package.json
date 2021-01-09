@@ -1,6 +1,6 @@
 {
-	"name": "lod",
-	"displayName": "lod",
+	"name": "msnemecode",
+	"displayName": "MSMemeCode",
 	"description": "",
 	"version": "0.0.1",
 	"engines": {
@@ -16,17 +16,48 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "lod.lint",
+				"command": "MemeCode.lint",
 				"title": "MemeCode: Lint"
 			},
 			{
-				"command": "lod.giveMeme",
-				"title": "MemeCode: Generate Meme"
+				"command": "MemeCode.giveMeme",
+				"title": "MemeCode: Make yourself happy"
 			},{
-				"command": "lod.thanosMeme",
+				"command": "MemeCode.thanosMeme",
 				"title": "MemeCode: Oh Snap"
 			}
-		]
+		],
+		"configuration":{
+			"title": "MSMemeCode",
+			"properties": {
+				"MSMemeCode.DankMemes":{
+					"type": "boolean",
+					"default":true,
+					"description": "See some dank memes to calm the mellow"
+				},
+				"MSMemeCode.CatPics":{
+					"type": "boolean",
+					"default":false,
+					"description": "You're boss is shouting at you? These cute cat pics oughtta change your mood"
+				},
+				"MSMemeCode.DogPics":{
+					"type": "boolean",
+					"default":false,
+					"description": "Failing all the integration tests? Doggo's here for you"
+				},
+				"MSMemeCode.Jokes":{
+					"type": "boolean",
+					"default":false,
+					"description": "Trying to impress a colleague? here are some jokes"
+				},
+				"MSMemeCode.TimeBetweenMemes":
+				{
+					"type":"integer",
+					"default":5,
+					"description": "Time between each daily update of memes"
+				}
+			}
+		}
 	},
 	"scripts": {
 		"lint": "eslint .",

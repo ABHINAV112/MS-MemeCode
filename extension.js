@@ -5,19 +5,13 @@ const vscode = require("vscode");
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
-const events = require("events");
-const eventEmitter = new events.EventEmitter();
 
+let MINUTES;
 let scheduler;
 let hackySolution;
-const createMemeWebView = async function () {
-  const panel = vscode.window.createWebviewPanel(
-    "meme",
-    "Meme",
-    vscode.ViewColumn.One,
-    {}
-  );
+let hackySolutionRunning = false;
 
+const dankMemeGenerator = async () => {
   const config = {
     method: "get",
     url: "https://meme-api.herokuapp.com/gimme",
@@ -26,7 +20,7 @@ const createMemeWebView = async function () {
   // @ts-ignore
   const result = await axios(config);
   const memeUrl = result.data.url;
-  panel.webview.html = `
+  return `
   <!DOCTYPE html>
   <html lang="en">
   <head>
@@ -38,6 +32,82 @@ const createMemeWebView = async function () {
   </body>
   </html>
 `;
+};
+
+const catGifGenerator = async () => {
+  const catUrl = "http://thecatapi.com/api/images/get?format=src&type=gif";
+  return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meme</title>
+  </head>
+     <img src="${catUrl}"></img>
+  </body>
+  </html>`;
+};
+
+const dogPicGenerator = async () => {
+  const baseUrl = "https://dog.ceo/api/breeds/image/random";
+  const config = {
+    method: "get",
+    url: baseUrl,
+    headers: {},
+  };
+  // @ts-ignore
+  const result = await axios(config);
+  const dogUrl = result.data.message;
+  return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meme</title>
+  </head>
+     <img src="${dogUrl}"></img>
+  </body>
+  </html>`;
+};
+
+const jokeGenerator = async () => {
+  const baseUrl = "https://v2.jokeapi.dev/joke/Any?format=txt";
+  const config = {
+    method: "get",
+    url: baseUrl,
+    headers: {},
+  };
+  // @ts-ignore
+  const result = await axios(config);
+  const jokeText = result.data;
+  return `<h1>${jokeText}</h1>`;
+};
+
+const createMemeWebView = async function () {
+  const contributionConfiguration = vscode.workspace.getConfiguration(
+    "MSMemeCode"
+  );
+
+  const keys = ["DankMemes", "CatPics", "DogPics", "Jokes"];
+  const keyUrlMapping = {
+    DankMemes: dankMemeGenerator,
+    CatPics: catGifGenerator,
+    DogPics: dogPicGenerator,
+    Jokes: jokeGenerator,
+  };
+  for (let i = 0; i < keys.length; i++) {
+    if (contributionConfiguration[keys[i]]) {
+      const panel = vscode.window.createWebviewPanel(
+        "meme",
+        keys[i],
+        vscode.ViewColumn.One,
+        {}
+      );
+      panel.webview.html = await keyUrlMapping[keys[i]]();
+    }
+  }
 };
 
 const createSnapWebView = function (quote) {
@@ -142,9 +212,19 @@ function activate(context) {
     context.subscriptions
   );
 
-  const lintCommand = vscode.commands.registerCommand("lod.lint", lint);
+  const lintCommand = vscode.commands.registerCommand("MemeCode.lint", () => {
+    if (!hackySolutionRunning) {
+      hackySolutionRunning = true;
+      hackySolution = setInterval(function () {
+        lint();
+      }, 1000);
+    } else {
+      hackySolutionRunning = false;
+      clearInterval(hackySolution);
+    }
+  });
 
-  const MINUTES = 5;
+  MINUTES = vscode.workspace.getConfiguration("MSMemeCode")["TimeBetweenMemes"];
   scheduler = setInterval(() => {
     console.log("testing");
     vscode.window.showInformationMessage(
@@ -153,14 +233,24 @@ function activate(context) {
     createMemeWebView();
   }, MINUTES * 60 * 1000);
 
+  vscode.workspace.onDidChangeConfiguration(() => {
+    clearInterval(scheduler);
+    MINUTES = vscode.workspace.getConfiguration("MSMemeCode")[
+      "TimeBetweenMemes"
+    ];
+    scheduler = setInterval(() => {
+      console.log("testing");
+      vscode.window.showInformationMessage(
+        "Its been a while, you should take a break here's a meme!"
+      );
+      createMemeWebView();
+    }, MINUTES * 60 * 1000);
+  });
+
   const webview = vscode.commands.registerCommand(
-    "lod.giveMeme",
+    "MemeCode.giveMeme",
     createMemeWebView
   );
-
-  hackySolution = setInterval(function () {
-    lint();
-  }, 1000);
 
   const thanosMeme = async function () {
     const thanosQuoteAPIUrl = "https://thanosapi.herokuapp.com/random/";
@@ -171,14 +261,10 @@ function activate(context) {
     };
     // @ts-ignore
     const thanosQuote = (await axios(config)).data.quote;
-    // console.log(thanosQuote);
-
     createSnapWebView(thanosQuote);
-
-    //
   };
   const thanosMemeCommand = vscode.commands.registerCommand(
-    "lod.thanosMeme",
+    "MemeCode.thanosMeme",
     thanosMeme
   );
 
